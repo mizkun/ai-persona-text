@@ -144,10 +144,43 @@
             padding-bottom: 1rem;
         }
 
+        .settings-section {
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        .settings-toggle {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.5rem 0;
+        }
+
+        .settings-toggle:hover {
+            color: var(--primary-color);
+        }
+
+        .settings-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .settings-content.open {
+            max-height: 200px;
+            padding-top: 1rem;
+        }
+
         .theme-toggle-section {
             margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -571,7 +604,7 @@
                 padding: 0.8rem;
             }
 
-            .theme-toggle-section {
+            .settings-section {
                 padding: 0.8rem;
             }
 
@@ -610,19 +643,28 @@
 
     <nav id="toc">
 <h2>目次</h2>
-<div class="theme-toggle-section">
-    <span style="font-size: 0.9rem; font-weight: 500;">表示モード</span>
-    <button class="theme-toggle" onclick="toggleTheme()">
-        <div class="theme-toggle-icon" id="themeIcon">☀</div>
-        <span id="themeText">ライト</span>
-    </button>
-</div>
 <div class="progress-section">
     <div class="progress-bar">
         <div class="progress-fill" id="progressFill"></div>
     </div>
     <div class="progress-text" id="progressText">0 / 0 完了 (0%)</div>
-    <button class="reset-progress" onclick="resetProgress()">進捗をリセット</button>
+</div>
+
+<div class="settings-section">
+    <button class="settings-toggle" onclick="toggleSettings()">
+        <span>設定</span>
+        <span id="settingsIcon">▼</span>
+    </button>
+    <div class="settings-content" id="settingsContent">
+        <div class="theme-toggle-section">
+            <span style="font-size: 0.9rem; font-weight: 500;">表示モード</span>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <div class="theme-toggle-icon" id="themeIcon">☀</div>
+                <span id="themeText">ライト</span>
+            </button>
+        </div>
+        <button class="reset-progress" onclick="resetProgress()">進捗をリセット</button>
+    </div>
 </div>
 <ul class="toc-list">
 <li class="toc-h1">
@@ -3976,6 +4018,12 @@
                                 const pageIndex = findPageIndexByTargetId(targetId);
                                 if (pageIndex >= 0) {
                                     showPage(pageIndex, false); // Don't auto-check when clicking TOC
+                                    
+                                    // Close TOC on mobile after navigation
+                                    if (window.innerWidth <= 768) {
+                                        const toc = document.getElementById('toc');
+                                        toc.classList.remove('show');
+                                    }
                                 }
                             }
                         });
@@ -4087,6 +4135,20 @@
             } else {
                 // Show TOC
                 toc.classList.add('show');
+            }
+        }
+
+        // Settings toggle functionality
+        function toggleSettings() {
+            const content = document.getElementById('settingsContent');
+            const icon = document.getElementById('settingsIcon');
+            
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                icon.textContent = '▼';
+            } else {
+                content.classList.add('open');
+                icon.textContent = '▲';
             }
         }
 
