@@ -3734,7 +3734,7 @@
         }
         
         // Show specific page
-        function showPage(index) {
+        function showPage(index, autoCheck = true) {
             if (index < 0 || index >= sections.length) return;
             
             currentPageIndex = index;
@@ -3754,8 +3754,10 @@
                 processMermaidInPage(currentPage);
             }
             
-            // Auto-check current section
-            autoCheckCurrentSection();
+            // Auto-check current section only if autoCheck is true
+            if (autoCheck) {
+                autoCheckCurrentSection();
+            }
             
             // Update navigation
             updateNavigation();
@@ -3973,7 +3975,7 @@
                                 const targetId = href.substring(1);
                                 const pageIndex = findPageIndexByTargetId(targetId);
                                 if (pageIndex >= 0) {
-                                    showPage(pageIndex);
+                                    showPage(pageIndex, false); // Don't auto-check when clicking TOC
                                 }
                             }
                         });
