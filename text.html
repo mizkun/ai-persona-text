@@ -642,7 +642,7 @@
         /* Mobile specific adjustments */
         @media (max-width: 768px) {
             :root {
-                --toc-width: 100vw;
+                --toc-width: 80vw;
             }
 
             header {
@@ -650,7 +650,20 @@
             }
 
             #toc {
-                width: 100vw;
+                width: 80vw;
+                box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
+            }
+
+            #toc.show::after {
+                content: '';
+                position: fixed;
+                top: 0;
+                left: 80vw;
+                width: 20vw;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.3);
+                z-index: -1;
+                pointer-events: none;
             }
 
             main {
