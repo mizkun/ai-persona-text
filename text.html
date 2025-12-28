@@ -530,18 +530,100 @@
             }
         }
 
+        /* Tablet and mobile responsive design */
         @media (max-width: 1024px) {
-            #toc {
-                position: static;
-                width: 100%;
-                height: auto;
-                max-height: 50vh;
-                border-right: none;
-                border-bottom: 1px solid var(--border-color);
+            :root {
+                --toc-width: 300px;
             }
+
+            /* TOC mobile behavior */
+            #toc {
+                position: fixed;
+                top: 60px;
+                left: 0;
+                width: var(--toc-width);
+                height: calc(100vh - 60px);
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1001;
+                border-right: 1px solid var(--border-color);
+                border-bottom: none;
+                box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
+            }
+
+            #toc.show {
+                transform: translateX(0);
+            }
+
+
             main {
                 margin-left: 0;
                 padding: 1.5rem;
+                padding-top: calc(60px + 1.5rem);
+            }
+        }
+
+        /* Mobile specific adjustments */
+        @media (max-width: 768px) {
+            :root {
+                --toc-width: 100vw;
+            }
+
+            header {
+                padding: 0 1rem;
+            }
+
+            #toc {
+                width: 100vw;
+            }
+
+            main {
+                padding: 1rem;
+                padding-top: calc(60px + 1rem);
+            }
+
+            .page-navigation {
+                flex-direction: column;
+                gap: 0.8rem;
+                margin: 2rem 0 1rem 0;
+            }
+
+            .nav-button {
+                width: 100%;
+                padding: 0.8rem 1rem;
+            }
+
+            .progress-section {
+                padding: 0.8rem;
+            }
+
+            .theme-toggle-section {
+                padding: 0.8rem;
+            }
+
+            .toc-list {
+                padding-bottom: 2rem;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            h2 {
+                font-size: 1.3rem;
+            }
+
+            h3 {
+                font-size: 1.1rem;
+            }
+
+            .toc-item {
+                padding: 0.4rem 0;
+            }
+
+            .toc-checkbox {
+                transform: scale(1.2);
+                margin-top: 0.4rem;
             }
         }
     </style>
@@ -4033,12 +4115,12 @@
         function toggleTOC() {
             const toc = document.getElementById('toc');
             
-            if (toc.classList.contains('hidden')) {
-                // Show TOC
-                toc.classList.remove('hidden');
-            } else {
+            if (toc.classList.contains('show')) {
                 // Hide TOC
-                toc.classList.add('hidden');
+                toc.classList.remove('show');
+            } else {
+                // Show TOC
+                toc.classList.add('show');
             }
         }
 
