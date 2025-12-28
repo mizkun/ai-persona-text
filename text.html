@@ -100,6 +100,84 @@
             background: var(--bg-secondary);
         }
 
+        .header-settings {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .header-settings:hover {
+            background: var(--bg-secondary);
+        }
+
+        /* Settings Modal */
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .settings-modal.open {
+            display: flex;
+        }
+
+        .settings-modal-content {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            min-width: 300px;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .settings-modal h3 {
+            margin: 0 0 1.5rem 0;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+
+        .settings-modal-item {
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-modal-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-modal .theme-toggle-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
         .header-title {
             margin-left: 1rem;
             font-size: 1.2rem;
@@ -144,40 +222,6 @@
             padding-bottom: 1rem;
         }
 
-        .settings-section {
-            margin-bottom: 1rem;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 1rem;
-        }
-
-        .settings-toggle {
-            background: none;
-            border: none;
-            color: var(--text-color);
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            font-size: 0.9rem;
-            font-weight: 500;
-            padding: 0.5rem 0;
-        }
-
-        .settings-toggle:hover {
-            color: var(--primary-color);
-        }
-
-        .settings-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-
-        .settings-content.open {
-            max-height: 200px;
-            padding-top: 1rem;
-        }
 
         .theme-toggle-section {
             margin-bottom: 1rem;
@@ -604,9 +648,6 @@
                 padding: 0.8rem;
             }
 
-            .settings-section {
-                padding: 0.8rem;
-            }
 
             .toc-list {
                 padding-bottom: 2rem;
@@ -639,6 +680,7 @@
     <!-- Header -->
     <header>
         <button class="header-hamburger" onclick="toggleTOC()">☰</button>
+        <button class="header-settings" onclick="toggleSettingsModal()">⚙️</button>
     </header>
 
     <nav id="toc">
@@ -650,22 +692,6 @@
     <div class="progress-text" id="progressText">0 / 0 完了 (0%)</div>
 </div>
 
-<div class="settings-section">
-    <button class="settings-toggle" onclick="toggleSettings()">
-        <span>設定</span>
-        <span id="settingsIcon">▼</span>
-    </button>
-    <div class="settings-content" id="settingsContent">
-        <div class="theme-toggle-section">
-            <span style="font-size: 0.9rem; font-weight: 500;">表示モード</span>
-            <button class="theme-toggle" onclick="toggleTheme()">
-                <div class="theme-toggle-icon" id="themeIcon">☀</div>
-                <span id="themeText">ライト</span>
-            </button>
-        </div>
-        <button class="reset-progress" onclick="resetProgress()">進捗をリセット</button>
-    </div>
-</div>
 <ul class="toc-list">
 <li class="toc-h1">
     <div class="toc-item">
@@ -3613,6 +3639,25 @@
 <p>Box, G. E. P. (1976). “Science and Statistics.” *Journal of the American Statistical Association*. <a href="https://doi.org/10.1080/01621459.1976.10480949" target="_blank">https://doi.org/10.1080/01621459.1976.10480949</a>)</p>
     </main>
 
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-modal-content">
+            <button class="settings-close" onclick="toggleSettingsModal()">×</button>
+            <h3>設定</h3>
+            <div class="settings-modal-item">
+                <div class="theme-toggle-section">
+                    <span style="font-size: 0.9rem; font-weight: 500;">表示モード</span>
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <div class="theme-toggle-icon" id="themeIcon">☀</div>
+                        <span id="themeText">ライト</span>
+                    </button>
+                </div>
+            </div>
+            <div class="settings-modal-item">
+                <button class="reset-progress" onclick="resetProgress()">進捗をリセット</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -4138,19 +4183,28 @@
             }
         }
 
-        // Settings toggle functionality
-        function toggleSettings() {
-            const content = document.getElementById('settingsContent');
-            const icon = document.getElementById('settingsIcon');
+        // Settings modal toggle functionality
+        function toggleSettingsModal() {
+            const modal = document.getElementById('settingsModal');
             
-            if (content.classList.contains('open')) {
-                content.classList.remove('open');
-                icon.textContent = '▼';
+            if (modal.classList.contains('open')) {
+                modal.classList.remove('open');
             } else {
-                content.classList.add('open');
-                icon.textContent = '▲';
+                modal.classList.add('open');
             }
         }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('settingsModal');
+            const settingsButton = document.querySelector('.header-settings');
+            
+            if (modal && modal.classList.contains('open') && 
+                !modal.querySelector('.settings-modal-content').contains(event.target) &&
+                !settingsButton.contains(event.target)) {
+                modal.classList.remove('open');
+            }
+        });
 
         // Theme toggle functionality
         function toggleTheme() {
