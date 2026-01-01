@@ -60,8 +60,34 @@
     <div id="test-results"></div>
 
     <script>
-        // テスト用の定数
+        // Import functions from text.html (copy the implementation here for testing)
         const READING_POSITION_KEY = 'persona-text-reading-position';
+
+        // Save reading position to localStorage
+        function saveReadingPosition(pageIndex) {
+            try {
+                localStorage.setItem(READING_POSITION_KEY, JSON.stringify(pageIndex));
+            } catch (e) {
+                console.error('Error saving reading position:', e);
+            }
+        }
+
+        // Load reading position from localStorage
+        function loadReadingPosition() {
+            try {
+                const stored = localStorage.getItem(READING_POSITION_KEY);
+                return stored ? JSON.parse(stored) : 0;
+            } catch (e) {
+                console.error('Error loading reading position:', e);
+                return 0;
+            }
+        }
+
+        // Mock function for integration test
+        function initReadingProgress() {
+            // This is a mock for testing purposes
+            return true;
+        }
 
         // テスト結果を表示する関数
         function displayTestResult(testName, passed, message) {

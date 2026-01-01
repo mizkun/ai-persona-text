@@ -3706,7 +3706,8 @@
     <script>
         // Reading Progress Management
         const STORAGE_KEY = 'persona-text-reading-progress';
-        
+        const READING_POSITION_KEY = 'persona-text-reading-position';
+
         // Pagination state
         let currentPageIndex = 0;
         let sections = [];
@@ -3738,15 +3739,16 @@
             // Get all sections (h1, h2, h3)
             const headings = document.querySelectorAll('main h1, main h2, main h3');
             sections = Array.from(headings);
-            
+
             // Get TOC items for navigation
             tocItems = Array.from(document.querySelectorAll('.toc-checkbox'));
-            
+
             // Create page sections
             createPageSections();
-            
-            // Show first page
-            showPage(0);
+
+            // Load saved reading position and show that page
+            const savedPosition = loadReadingPosition();
+            showPage(savedPosition);
         }
         
         // Create page sections by wrapping content between headings
@@ -3852,35 +3854,38 @@
         // Show specific page
         function showPage(index, autoCheck = true) {
             if (index < 0 || index >= sections.length) return;
-            
+
             currentPageIndex = index;
-            
+
             // Hide all pages
             document.querySelectorAll('.page-section').forEach(page => {
                 page.classList.remove('active');
             });
-            
+
             // Show current page
             const currentPage = document.getElementById(`page-${index}`);
             if (currentPage) {
                 currentPage.classList.add('active');
                 currentPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                
+
                 // Process mermaid diagrams in the current page only
                 processMermaidInPage(currentPage);
             }
-            
+
             // Auto-check current section only if autoCheck is true
             if (autoCheck) {
                 autoCheckCurrentSection();
             }
-            
+
             // Update navigation
             updateNavigation();
-            
-            
+
+
             // Update TOC active state
             updateTOCActiveState();
+
+            // Save reading position
+            saveReadingPosition(index);
         }
         
         // Process mermaid diagrams only for the current page
@@ -4141,7 +4146,7 @@
         // Load progress from localStorage
         function loadProgress() {
             const progress = getStoredProgress();
-            
+
             Object.keys(progress).forEach(sectionId => {
                 if (progress[sectionId]) {
                     const checkbox = document.querySelector(`[data-section="${sectionId}"]`);
@@ -4155,7 +4160,27 @@
                 }
             });
         }
-        
+
+        // Save reading position to localStorage
+        function saveReadingPosition(pageIndex) {
+            try {
+                localStorage.setItem(READING_POSITION_KEY, JSON.stringify(pageIndex));
+            } catch (e) {
+                console.error('Error saving reading position:', e);
+            }
+        }
+
+        // Load reading position from localStorage
+        function loadReadingPosition() {
+            try {
+                const stored = localStorage.getItem(READING_POSITION_KEY);
+                return stored ? JSON.parse(stored) : 0;
+            } catch (e) {
+                console.error('Error loading reading position:', e);
+                return 0;
+            }
+        }
+
         // Update progress bar and text
         function updateProgressDisplay() {
             const checkboxes = document.querySelectorAll('.toc-checkbox');
