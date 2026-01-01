@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>読書位置記録機能テスト</title>
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .test-case {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .test-case h3 {
+            margin-top: 0;
+        }
+        .pass {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .fail {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+        .pending {
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .error {
+            color: #721c24;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>読書位置記録機能 - TDDテスト</h1>
+    <p>このテストは実装前に作成されています。すべてのテストが失敗するはずです。</p>
+
+    <button onclick="runAllTests()">すべてのテストを実行</button>
+    <button onclick="clearLocalStorage()">LocalStorageをクリア</button>
+
+    <div id="test-results"></div>
+
+    <script>
+        // テスト用の定数
+        const READING_POSITION_KEY = 'persona-text-reading-position';
+
+        // テスト結果を表示する関数
+        function displayTestResult(testName, passed, message) {
+            const resultsDiv = document.getElementById('test-results');
+            const testDiv = document.createElement('div');
+            testDiv.className = `test-case ${passed ? 'pass' : 'fail'}`;
+            testDiv.innerHTML = `
+                <h3>${passed ? '✓' : '✗'} ${testName}</h3>
+                <p>${message}</p>
+            `;
+            resultsDiv.appendChild(testDiv);
+        }
+
+        // すべてのテストを実行
+        function runAllTests() {
+            const resultsDiv = document.getElementById('test-results');
+            resultsDiv.innerHTML = '';
+
+            test_saveReadingPosition_shouldSaveToLocalStorage();
+            test_loadReadingPosition_shouldReturnSavedPosition();
+            test_loadReadingPosition_shouldReturnZeroWhenNoSavedPosition();
+            test_saveReadingPosition_shouldUpdateExistingPosition();
+            test_loadReadingPosition_shouldReturnNumberType();
+            test_initReadingProgress_shouldRestoreLastPosition();
+        }
+
+        // LocalStorageをクリア
+        function clearLocalStorage() {
+            localStorage.removeItem(READING_POSITION_KEY);
+            alert('LocalStorageをクリアしました');
+        }
+
+        // テスト1: saveReadingPosition関数がlocalStorageに保存すること
+        function test_saveReadingPosition_shouldSaveToLocalStorage() {
+            const testName = 'saveReadingPosition: localStorageに位置を保存する';
+
+            try {
+                // 事前準備: localStorageをクリア
+                localStorage.removeItem(READING_POSITION_KEY);
+
+                // 実行: ページ5を保存
+                if (typeof saveReadingPosition === 'undefined') {
+                    throw new Error('saveReadingPosition関数が定義されていません');
+                }
+                saveReadingPosition(5);
+
+                // 検証: localStorageに保存されているか
+                const saved = localStorage.getItem(READING_POSITION_KEY);
+                if (saved === null) {
+                    throw new Error('localStorageに保存されていません');
+                }
+
+                const position = JSON.parse(saved);
+                if (position !== 5) {
+                    throw new Error(`期待値: 5, 実際の値: ${position}`);
+                }
+
+                displayTestResult(testName, true, 'ページ位置5がlocalStorageに正しく保存されました');
+            } catch (error) {
+                displayTestResult(testName, false, `エラー: ${error.message}`);
+            }
+        }
+
+        // テスト2: loadReadingPosition関数が保存された位置を返すこと
+        function test_loadReadingPosition_shouldReturnSavedPosition() {
+            const testName = 'loadReadingPosition: 保存された位置を返す';
+
+            try {
+                // 事前準備: 位置10を保存
+                localStorage.setItem(READING_POSITION_KEY, JSON.stringify(10));
+
+                // 実行
+                if (typeof loadReadingPosition === 'undefined') {
+                    throw new Error('loadReadingPosition関数が定義されていません');
+                }
+                const position = loadReadingPosition();
+
+                // 検証
+                if (position !== 10) {
+                    throw new Error(`期待値: 10, 実際の値: ${position}`);
+                }
+
+                displayTestResult(testName, true, '保存された位置10が正しく読み込まれました');
+            } catch (error) {
+                displayTestResult(testName, false, `エラー: ${error.message}`);
+            }
+        }
+
+        // テスト3: loadReadingPosition関数が保存がない場合0を返すこと
+        function test_loadReadingPosition_shouldReturnZeroWhenNoSavedPosition() {
+            const testName = 'loadReadingPosition: 保存がない場合は0を返す';
+
+            try {
+                // 事前準備: localStorageをクリア
+                localStorage.removeItem(READING_POSITION_KEY);
+
+                // 実行
+                if (typeof loadReadingPosition === 'undefined') {
+                    throw new Error('loadReadingPosition関数が定義されていません');
+                }
+                const position = loadReadingPosition();
+
+                // 検証
+                if (position !== 0) {
+                    throw new Error(`期待値: 0, 実際の値: ${position}`);
+                }
+
+                displayTestResult(testName, true, '保存がない場合、デフォルト値0が返されました');
+            } catch (error) {
+                displayTestResult(testName, false, `エラー: ${error.message}`);
+            }
+        }
+
+        // テスト4: saveReadingPosition関数が既存の位置を上書きすること
+        function test_saveReadingPosition_shouldUpdateExistingPosition() {
+            const testName = 'saveReadingPosition: 既存の位置を上書きする';
+
+            try {
+                // 事前準備: 位置3を保存
+                localStorage.setItem(READING_POSITION_KEY, JSON.stringify(3));
+
+                // 実行: 位置7で上書き
+                if (typeof saveReadingPosition === 'undefined') {
+                    throw new Error('saveReadingPosition関数が定義されていません');
+                }
+                saveReadingPosition(7);
+
+                // 検証
+                const saved = localStorage.getItem(READING_POSITION_KEY);
+                const position = JSON.parse(saved);
+                if (position !== 7) {
+                    throw new Error(`期待値: 7, 実際の値: ${position}`);
+                }
+
+                displayTestResult(testName, true, '既存の位置が7に上書きされました');
+            } catch (error) {
+                displayTestResult(testName, false, `エラー: ${error.message}`);
+            }
+        }
+
+        // テスト5: loadReadingPosition関数が数値型を返すこと
+        function test_loadReadingPosition_shouldReturnNumberType() {
+            const testName = 'loadReadingPosition: 数値型を返す';
+
+            try {
+                // 事前準備
+                localStorage.setItem(READING_POSITION_KEY, JSON.stringify(15));
+
+                // 実行
+                if (typeof loadReadingPosition === 'undefined') {
+                    throw new Error('loadReadingPosition関数が定義されていません');
+                }
+                const position = loadReadingPosition();
+
+                // 検証
+                if (typeof position !== 'number') {
+                    throw new Error(`期待される型: number, 実際の型: ${typeof position}`);
+                }
+
+                displayTestResult(testName, true, '数値型が正しく返されました');
+            } catch (error) {
+                displayTestResult(testName, false, `エラー: ${error.message}`);
+            }
+        }
+
+        // テスト6: initReadingProgress関数がページロード時に最後の位置を復元すること
+        function test_initReadingProgress_shouldRestoreLastPosition() {
+            const testName = 'initReadingProgress: ページロード時に最後の位置を復元する（統合テスト）';
+
+            try {
+                // 事前準備: 位置12を保存
+                localStorage.setItem(READING_POSITION_KEY, JSON.stringify(12));
+
+                // 注意: この統合テストは実際のページで実行する必要があります
+                // ここでは関数の存在のみを確認
+                if (typeof initReadingProgress === 'undefined') {
+                    throw new Error('initReadingProgress関数が定義されていません');
+                }
+
+                // この統合テストは実際のtext.htmlページで手動検証が必要
+                displayTestResult(testName, false, '統合テストは実際のページで手動検証が必要です（現在は未実装）');
+            } catch (error) {
+                displayTestResult(testName, false, `エラー: ${error.message}`);
+            }
+        }
+
+        // ページロード時の説明を表示
+        window.addEventListener('DOMContentLoaded', function() {
+            const resultsDiv = document.getElementById('test-results');
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'test-case pending';
+            infoDiv.innerHTML = `
+                <h3>📝 テスト実行方法</h3>
+                <p>1. 「すべてのテストを実行」ボタンをクリックしてください</p>
+                <p>2. すべてのテストが失敗することを確認してください（実装前のため）</p>
+                <p>3. 実装後に再度テストを実行し、すべてが成功することを確認してください</p>
+            `;
+            resultsDiv.appendChild(infoDiv);
+        });
+    </script>
+</body>
+</html>
